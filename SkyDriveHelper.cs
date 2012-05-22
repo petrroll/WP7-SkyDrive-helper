@@ -54,7 +54,7 @@ namespace SkyDriveHelper
             client.PostCompleted += new EventHandler<LiveOperationCompletedEventArgs>(createFolder_Completed);  //Called when folder is created
         }
 
-        public void ZkontrolujJestliExistujeMojeSlozkaAKdyztakVytvor(string folderName)
+        public void CheckAndIfNotExistsCreateFolder(string folderName)
         {
             this.folderName = folderName;
             client.GetAsync("me/skydrive/files?filter=folders");
