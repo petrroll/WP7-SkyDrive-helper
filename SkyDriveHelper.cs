@@ -134,10 +134,10 @@ namespace SkyDriveHelper
 
         }
 
-        public void InitClient(LiveConnectSession session)
+        public void InitClient(LiveConnectSession _session)
         {
-            client = new LiveConnectClient(session);
-            client.UploadCompleted += (object sender, LiveOperationCompletedEventArgs args) => { iSFile_UploadCompleted(sender, args, fileNameInSkyDrive, readStream); };
+            client = new LiveConnectClient(_session);
+            client.UploadCompleted += (object sender, LiveOperationCompletedEventArgs args) => { iSFile_UploadCompleted(sender, args, fileNameInSkyDrive); };
             client.GetCompleted += (object sender, LiveOperationCompletedEventArgs e) => { getFiles_GetCompleted(sender, e, fileNameID); };
             client.DownloadCompleted += (object sender, LiveDownloadCompletedEventArgs e) => client_DownloadCompleted(sender, e, fileNameInIsolatedStorage);
         }
@@ -148,7 +148,44 @@ namespace SkyDriveHelper
         public event SkyHelperUploadDelegate UploadComplete;
 
         IsolatedStorageFileStream readStream;
+        MemoryStream memoryStream;
+
         string fileNameInSkyDrive = string.Empty;
+
+        public void UploadFile<T>(string skyDriveFolderID, T data, string fileNameInSkyDrive)
+        {
+            this.fileNameInSkyDrive = fileNameInSkyDrive;
+            if (skyDriveFolderID != string.Empty)
+            {
+                try
+                {
+                    memoryStream = new MemoryStream();
+
+                    XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
+                    xmlWriterSettings.Indent = true;
+
+                    XmlSerializer serializer = new XmlSerializer(typeof(T));
+                    using (XmlWriter xmlWriter = XmlWriter.Create(memoryStream, xmlWriterSettings))
+                    {
+                        serializer.Serialize(xmlWriter, data);
+                    }
+
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+                    client.UploadAsync(skyDriveFolderID, fileNameInSkyDrive, true, memoryStream, null);
+                }
+
+                catch (Exception ex)
+                {
+                    if (memoryStream != null) { memoryStream.Dispose(); }
+                    MessageBox.Show("Error accessing IsolatedStorage. Please close the app and re-open it, and then try backing up again!" + "/n" + ex.Message, "Backup Failed", MessageBoxButton.OK);
+                    if (UploadComplete != null) { UploadComplete(false, fileNameInSkyDrive); }
+                }
+            }
+            else
+            {
+                if (UploadComplete != null) { UploadComplete(false, fileNameInSkyDrive); }
+            }
+        }
 
         public void UploadFile(string skyDriveFolderID, string fileNameInIsolatedStorage, string fileNameInSkyDrive)
         {
@@ -179,9 +216,11 @@ namespace SkyDriveHelper
             }
         }
 
-        private void iSFile_UploadCompleted(object sender, LiveOperationCompletedEventArgs args, string fileName, IsolatedStorageFileStream readStream)
+        private void iSFile_UploadCompleted(object sender, LiveOperationCompletedEventArgs args, string fileName)
         {
-            readStream.Dispose();
+            if (readStream != null) { readStream.Dispose(); }
+            if (memoryStream != null) { memoryStream.Dispose(); }
+
             if (args.Error == null)
             {
                 if (UploadComplete != null) { UploadComplete(true, fileName); }
