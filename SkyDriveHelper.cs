@@ -1,17 +1,10 @@
-﻿using System;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
-using Microsoft.Live;
+﻿using Microsoft.Live;
+using System;
 using System.Collections.Generic;
 using System.IO.IsolatedStorage;
 using System.IO;
+using System.Xml.Serialization;
+using System.Xml;
 
 namespace SkyDriveHelper
 {
@@ -97,10 +90,9 @@ namespace SkyDriveHelper
             }
             else
             {
-                MessageBox.Show(e.Error.Message);
                 if (FolderReady != null)
                 {
-                    if (FolderReady != null) { FolderReady(false, string.Empty); }
+                    if (FolderReady != null) { FolderReady(false, e.Error.Message); }
                 }
             }
         }
@@ -116,8 +108,7 @@ namespace SkyDriveHelper
             }
             else
             {
-                MessageBox.Show(e.Error.Message);
-                if (FolderReady != null) { FolderReady(false, string.Empty); }
+                if (FolderReady != null) { FolderReady(false, e.Error.Message); }
             }
         }
 
@@ -177,8 +168,7 @@ namespace SkyDriveHelper
                 catch (Exception ex)
                 {
                     if (memoryStream != null) { memoryStream.Dispose(); }
-                    MessageBox.Show("Error accessing IsolatedStorage. Please close the app and re-open it, and then try backing up again!" + "/n" + ex.Message, "Backup Failed", MessageBoxButton.OK);
-                    if (UploadComplete != null) { UploadComplete(false, fileNameInSkyDrive); }
+                    if (UploadComplete != null) { UploadComplete(false, ex.Message.ToString()); }
                 }
             }
             else
@@ -206,8 +196,7 @@ namespace SkyDriveHelper
                 catch(Exception ex)
                 {
                     if (readStream != null) { readStream.Dispose(); }
-                    MessageBox.Show("Error accessing IsolatedStorage. Please close the app and re-open it, and then try backing up again!" + "/n" + ex.Message, "Backup Failed", MessageBoxButton.OK);
-                    if (UploadComplete != null) { UploadComplete(false, fileNameInSkyDrive); }
+                    if (UploadComplete != null) { UploadComplete(false, ex.Message); }
                 }
             }
             else
@@ -297,7 +286,6 @@ namespace SkyDriveHelper
 
             else
             {
-                MessageBox.Show("Backup file doesn't exist!", "Error", MessageBoxButton.OK);
                 if (DownloadComplete != null) { DownloadComplete(false, string.Empty); }
             }
         }
@@ -319,10 +307,9 @@ namespace SkyDriveHelper
                 if (DownloadComplete != null) { DownloadComplete(true, saveToPath); }
             }
 
-            catch
+            catch(Exception ex)
             {
-                MessageBox.Show("Restore failed.", "Failure", MessageBoxButton.OK);
-                if (DownloadComplete != null) { DownloadComplete(false, saveToPath); }
+                if (DownloadComplete != null) { DownloadComplete(false, ex.Message); }
             }
         }
 
