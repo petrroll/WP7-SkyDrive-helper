@@ -195,7 +195,7 @@ namespace SkyDriveHelper
         #endregion 
 
         #region GetFileIDFromSkyDrive
-        public delegate void SkyHelperFileDelegate(bool result, string fileID, string fileName);
+        public delegate void SkyHelperFileDelegate(bool result, string fileID, string fileName, DateTimeOffset date);
         public event SkyHelperFileDelegate IsFileThere;
 
         private string fileNameID = string.Empty;
@@ -211,7 +211,7 @@ namespace SkyDriveHelper
             string fileID = string.Empty;
 
             List<object> data = (List<object>)e.Result["data"];
-            //DateTimeOffset date = DateTime.MinValue;
+            DateTimeOffset date = DateTime.MinValue;
 
             foreach (IDictionary<string, object> content in data)
             {
@@ -220,7 +220,7 @@ namespace SkyDriveHelper
                     fileID = (string)content["id"];
                     try
                     {
-                        //date = DateTimeOffset.Parse(((string)content["updated_time"]).Substring(0, 19));
+                        date = DateTimeOffset.Parse(((string)content["updated_time"]).Substring(0, 24));
                     }
 
                     catch { }
@@ -231,12 +231,12 @@ namespace SkyDriveHelper
 
             if (fileID != string.Empty)
             {
-                if (IsFileThere != null) { IsFileThere(true, fileID, fileNameID); }
+                if (IsFileThere != null) { IsFileThere(true, fileID, fileNameID, date); }
             }
 
             else
             {
-                if (IsFileThere != null) { IsFileThere(false, fileID, fileNameID); }
+                if (IsFileThere != null) { IsFileThere(false, fileID, fileNameID, date); }
             }
         }
         #endregion
