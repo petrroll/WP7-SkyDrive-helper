@@ -1,5 +1,5 @@
 ###About:
-A simple SkyDrive helper class I've written __a few years ago__ to make backing up stuff from WP7 apps easier. Since the API has changed over the few years quite drastically it __probably won't  work now__ (and I was also a rubish coder back then so good luck understanding it :) ).
+A simple SkyDrive helper class I've written __a few years ago__ to make backing up stuff from WP7 apps easier. Since the API has changed over the few years quite drastically it __probably won't  work now__ (and it was also written during my high-school years so don't expect perfect clean code).
 
 __Disclaimer:__ It's build on top of SkyDrive [backup sample by Andrew Bares](http://wmpoweruser.com/developers-use-skydrive-to-backup-app-data/). 
 
